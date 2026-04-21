@@ -160,18 +160,42 @@ function App() {
   // 🔍 DIRECT FIREBASE CALL
   const testDirectFirebaseCall = async () => {
     try {
-      addLog("🔍 Calling Firebase function directly...");
+      addLog("🔍 Calling Firebase function in parallel (10 requests)...");
 
-      const fn = httpsCallable(functions, functionName);
-      const payload = buildPayload();
+      const fn = httpsCallable(functions, "generateNormalRechargeToken");
 
-      const res = await fn(payload);
+      const requests = [];
 
-      addLog("✅ Direct call success", "success");
-      addLog(JSON.stringify(res.data, null, 2));
+      for (let i = 0; i < 3; i++) {
+        const payload = buildPayload();
+
+        requests.push(fn(payload));
+      }
+
+      const start = Date.now();
+
+      const results = await Promise.allSettled(requests);
+
+      const timeTaken = Date.now() - start;
+
+      let success = 0;
+      let failed = 0;
+
+      results.forEach((res, i) => {
+        if (res.status === "fulfilled") {
+          success++;
+          addLog(`✅ Success ${i}`, "success");
+        } else {
+          failed++;
+          addLog(`❌ Failed ${i}: ${res.reason.message}`, "error");
+        }
+      });
+
+      addLog(`🎯 Done: ${success} success, ${failed} failed`, "success");
+      addLog(`⏱ Time Taken: ${timeTaken} ms`);
 
     } catch (err) {
-      addLog("❌ Direct call failed: " + err.message, "error");
+      addLog("❌ Error: " + err.message, "error");
     }
   };
 
