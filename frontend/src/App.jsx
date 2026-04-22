@@ -160,15 +160,14 @@ function App() {
   // 🔍 DIRECT FIREBASE CALL
   const testDirectFirebaseCall = async () => {
     try {
-      addLog("🔍 Calling Firebase function in parallel (10 requests)...");
+      addLog("🔍 Calling Firebase function in parallel (50 requests)...");
 
       const fn = httpsCallable(functions, "generateNormalRechargeToken");
 
       const requests = [];
 
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < 10; i++) {
         const payload = buildPayload();
-
         requests.push(fn(payload));
       }
 
@@ -184,10 +183,20 @@ function App() {
       results.forEach((res, i) => {
         if (res.status === "fulfilled") {
           success++;
-          addLog(`✅ Success ${i}`, "success");
+
+          const r = res.value.data; // 🔥 your handleResponse object
+
+          addLog(
+              `✅ ${i} | code=${r.code} | msg=${r.message} | token=${r.data?.token} | time=${r.serverTime}`,
+              "success"
+          );
+
+          // Optional detailed log
+          addLog(`📦 Full Data ${i}: ${JSON.stringify(r.data)}`);
+
         } else {
           failed++;
-          addLog(`❌ Failed ${i}: ${res.reason.message}`, "error");
+          addLog(`❌ ${i}: ${res.reason.message}`, "error");
         }
       });
 
