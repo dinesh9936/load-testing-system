@@ -162,7 +162,7 @@ function App() {
     try {
       addLog("🔍 Calling Firebase function in parallel (50 requests)...");
 
-      const fn = httpsCallable(functions, "generateNormalRechargeToken");
+      const fn = httpsCallable(functions, "testDelayResponse");
 
       const requests = [];
 
@@ -170,6 +170,7 @@ function App() {
         const payload = buildPayload();
         requests.push(fn(payload));
       }
+
 
       const start = Date.now();
 
